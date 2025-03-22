@@ -1,12 +1,13 @@
 #include "read_matrix.h"
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 
-Matrix read_matrix(std::string path) {
+Matrix read_matrix(const std::string path) {
   Matrix matrix;
   matrix.items = nullptr;
-  matrix.x = 0;
-  matrix.y = 0;
+  matrix.rows = 0;
+  matrix.cols = 0;
 
   std::ifstream file(path);
   if (!file.is_open()) {
@@ -14,29 +15,31 @@ Matrix read_matrix(std::string path) {
     return matrix;
   }
 
-  file >> matrix.y >> matrix.x;
+  file >> matrix.cols >> matrix.rows;
 
-  if (file.fail() || matrix.x <= 0 || matrix.y <= 0) {
-    std::cerr << "Error: Invalid matrix dimensions" << std::endl;
+  if (file.fail() || matrix.rows <= MATRIX_SIZE_MIN ||
+      matrix.rows > MATRIX_SIZE_MAX || matrix.cols <= MATRIX_SIZE_MIN ||
+      matrix.cols > MATRIX_SIZE_MAX) {
+    std::cerr << "Error: Invalid matrix dimensions\n";
     return matrix;
   }
 
-  matrix.items = new (std::nothrow) int32_t[matrix.x * matrix.y];
+  matrix.items = new (std::nothrow) int32_t[matrix.rows * matrix.cols];
   if (matrix.items == nullptr) {
-    std::cerr << "Error: Memory allocation failed" << std::endl;
+    std::cerr << "Error: Buy more RAM.\n";
     return matrix;
   }
 
-  for (int32_t i = 0; i < matrix.y; i++) {
-    for (int32_t j = 0; j < matrix.x; j++) {
-      file >> matrix.items[i * matrix.x + j];
+  for (uint16_t y = 0; y < matrix.cols; y++) {
+    for (uint16_t x = 0; x < matrix.rows; x++) {
+      file >> matrix.items[y * matrix.rows + x];
       if (file.fail()) {
-        std::cerr << "Error: Failed to read matrix element at position (" << i
-                  << ", " << j << ")" << std::endl;
+        std::cerr << "Error: Failed to read matrix element at position (" << y
+                  << ", " << x << ")\n";
         delete[] matrix.items;
         matrix.items = nullptr;
-        matrix.x = 0;
-        matrix.y = 0;
+        matrix.rows = 0;
+        matrix.cols = 0;
         return matrix;
       }
     }

@@ -1,27 +1,35 @@
 #include "read_matrix.h"
+#include <cstdint>
+#include <cstring>
 #include <iostream>
 
-Matrix multiply(Matrix *m1, Matrix *m2) {
+Matrix multiply(const Matrix *m1, const Matrix *m2) {
   Matrix m;
-  m.items = new (std::nothrow) int32_t[m1->x * m1->y];
-  m.x = m1->x;
-  m.y = m1->y;
 
-  m.items = new (std::nothrow) int32_t[m.y * m.x];
-  if (m.items == nullptr) {
-    std::cerr << "Error: Memory allocation failed" << std::endl;
+  if (m1->rows != m2->cols) {
+    std::cerr << "Error: Incompatible matrix dimensions for multiplication\n";
+    m.items = nullptr;
+    m.rows = 0;
+    m.cols = 0;
     return m;
   }
 
-  for (int32_t i = 0; i < m.y * m.x; ++i) {
-    m.items[i] = 0;
+  m.rows = m2->rows;
+  m.cols = m1->cols;
+
+  m.items = new (std::nothrow) int32_t[m.cols * m.rows];
+  if (m.items == nullptr) {
+    std::cerr << "Error: Memory allocation failed\n";
+    return m;
   }
 
-  for (int32_t i = 0; i < m1->y; ++i) {
-    for (int32_t k = 0; k < m1->x; ++k) {
-      int32_t a_ik = m1->items[i * m1->x + k];
-      for (int32_t j = 0; j < m2->x; ++j) {
-        m.items[i * m.x + j] += a_ik * m2->items[k * m2->x + j];
+  std::memset(m.items, 0, sizeof(int32_t) * m.cols * m.rows);
+
+  for (uint16_t i = 0; i < m1->cols; ++i) {
+    for (uint16_t k = 0; k < m1->rows; ++k) {
+      int32_t a_ik = m1->items[i * m1->rows + k];
+      for (uint16_t j = 0; j < m2->rows; ++j) {
+        m.items[i * m.rows + j] += a_ik * m2->items[k * m2->rows + j];
       }
     }
   }
@@ -35,21 +43,34 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  std::string path_1 = argv[1];
-  std::string path_2 = argv[2];
+  const std::string path_1 = argv[1];
+  const std::string path_2 = argv[2];
 
-  Matrix m1 = read_matrix(path_1);
-  Matrix m2 = read_matrix(path_2);
-  Matrix m3 = multiply(&m1, &m2);
+  const Matrix m1 = read_matrix(path_1);
+  const Matrix m2 = read_matrix(path_2);
 
-  std::cout << "x: " << m1.x << ' ' << "y: " << m1.y << '\n';
-
-  for (int32_t i = 0; i < m3.y; i++) {
-    for (int32_t j = 0; j < m3.x; j++) {
-      std::cout << m3.items[i * m3.x + j] << " ";
-    }
-    std::cout << std::endl;
+  if (m1.items == nullptr || m2.items == nullptr) {
+    return 1;
   }
+
+  const Matrix m3 = multiply(&m1, &m2);
+
+  if (m3.items == nullptr) {
+    return 1;
+  }
+
+  std::cout << "rows: " << m1.rows << ' ' << "columns: " << m1.cols << '\n';
+
+  for (uint16_t i = 0; i < m3.cols; i++) {
+    for (uint16_t j = 0; j < m3.rows; j++) {
+      std::cout << m3.items[i * m3.rows + j] << " ";
+    }
+    std::cout << '\n';
+  }
+
+  delete[] m1.items;
+  delete[] m2.items;
+  delete[] m3.items;
 
   return 0;
 }

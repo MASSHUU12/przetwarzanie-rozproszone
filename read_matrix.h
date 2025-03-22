@@ -4,12 +4,15 @@
 #include <cstdint>
 #include <string>
 
+constexpr uint16_t MATRIX_SIZE_MIN = 0;
+constexpr uint16_t MATRIX_SIZE_MAX = 100;
+
 struct Matrix {
   int32_t *items;
-  int32_t x;
-  int32_t y;
+  uint16_t rows;
+  uint16_t cols;
 };
 
-Matrix read_matrix(std::string path);
+Matrix read_matrix(const std::string path);
 
 #endif // READ_MATRIX_H_
