@@ -1,9 +1,10 @@
 #include "matrix.h"
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 
-Matrix read_matrix(const std::string path) {
+Matrix matrix_read(const std::string path) {
   Matrix matrix;
   matrix.items = nullptr;
   matrix.rows = 0;
@@ -50,7 +51,7 @@ Matrix read_matrix(const std::string path) {
   return matrix;
 }
 
-bool save_matrix(const std::string path, const Matrix *mat) {
+bool matrix_save(const std::string path, const Matrix *mat) {
   std::ofstream file(path);
   if (!file.is_open()) {
     std::cerr << "Error: Unable to save to a file " << path << '\n';
@@ -73,4 +74,38 @@ bool save_matrix(const std::string path, const Matrix *mat) {
   file.close();
 
   return true;
+}
+
+Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
+  Matrix m;
+
+  if (m1->rows != m2->cols) {
+    std::cerr << "Error: Incompatible matrix dimensions for multiplication\n";
+    m.items = nullptr;
+    m.rows = 0;
+    m.cols = 0;
+    return m;
+  }
+
+  m.rows = m2->rows;
+  m.cols = m1->cols;
+
+  m.items = new (std::nothrow) int32_t[m.cols * m.rows];
+  if (m.items == nullptr) {
+    std::cerr << "Error: Memory allocation failed\n";
+    return m;
+  }
+
+  std::memset(m.items, 0, sizeof(int32_t) * m.cols * m.rows);
+
+  for (uint16_t i = 0; i < m1->cols; ++i) {
+    for (uint16_t k = 0; k < m1->rows; ++k) {
+      int32_t a_ik = m1->items[i * m1->rows + k];
+      for (uint16_t j = 0; j < m2->rows; ++j) {
+        m.items[i * m.rows + j] += a_ik * m2->items[k * m2->rows + j];
+      }
+    }
+  }
+
+  return m;
 }
