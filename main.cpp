@@ -2,18 +2,28 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <unistd.h>
 
 int main(int argc, char **argv) {
-  if (argc < 3) {
-    std::cerr << "Usage: <path_1> <path_2>\n";
-    return 1;
+  int32_t opt;
+  std::string in1 = "../m1.matrix", in2 = "../m2.matrix", out = "../out.matrix";
+
+  while ((opt = getopt(argc, argv, "a:b:o:")) != -1) {
+    switch (opt) {
+      case 'a':
+        in1 = optarg;
+      case 'b':
+        in2 = optarg;
+      case 'o':
+        out = optarg;
+      default:
+        std::cerr << "Usage: [ -a in_path ] [ -b in_path ] [ -o out_path ] <\n";
+        return 1;
+    }
   }
 
-  const std::string path_1 = argv[1];
-  const std::string path_2 = argv[2];
-
-  const Matrix m1 = matrix_read(path_1);
-  const Matrix m2 = matrix_read(path_2);
+  const Matrix m1 = matrix_read(in1);
+  const Matrix m2 = matrix_read(in2);
 
   if (m1.items == nullptr || m2.items == nullptr) {
     return 1;
