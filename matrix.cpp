@@ -37,7 +37,6 @@ Matrix matrix_read(const std::string path) {
       if (file.fail()) {
         std::cerr << "Error: Failed to read matrix element at position (" << y
                   << ", " << x << ")\n";
-        delete[] matrix.items;
         matrix.items = nullptr;
         matrix.rows = 0;
         matrix.cols = 0;
@@ -79,7 +78,7 @@ bool matrix_save(const std::string path, const Matrix *mat) {
 Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
   Matrix m;
 
-  if (m1->rows != m2->cols) {
+  if (m1->cols != m2->rows) {
     std::cerr << "Error: Incompatible matrix dimensions for multiplication\n";
     m.items = nullptr;
     m.rows = 0;
@@ -98,11 +97,14 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
 
   std::memset(m.items, 0, sizeof(int32_t) * m.cols * m.rows);
 
-  for (uint16_t i = 0; i < m1->cols; ++i) {
-    for (uint16_t k = 0; k < m1->rows; ++k) {
-      int32_t a_ik = m1->items[i * m1->rows + k];
-      for (uint16_t j = 0; j < m2->rows; ++j) {
-        m.items[i * m.rows + j] += a_ik * m2->items[k * m2->rows + j];
+#ifdef MATRIX_PARALLELIZE
+#pragma omp parallel for
+#endif
+  for (uint16_t i = 0; i < m1->rows; ++i) {
+    for (uint16_t j = 0; j < m2->cols; ++j) {
+      for (uint16_t k = 0; k < m1->cols; ++k) {
+        m.items[i * m.cols + j] +=
+            m1->items[i * m1->cols + k] * m2->items[k * m2->cols + j];
       }
     }
   }

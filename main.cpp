@@ -36,9 +36,5 @@ int main(int argc, char **argv) {
 
   matrix_save("../out.matrix", &m3);
 
-  delete[] m1.items;
-  delete[] m2.items;
-  delete[] m3.items;
-
   return 0;
 }
