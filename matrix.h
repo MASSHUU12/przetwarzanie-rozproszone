@@ -1,5 +1,5 @@
-#ifndef READ_MATRIX_H_
-#define READ_MATRIX_H_
+#ifndef MATRIX_H_
+#define MATRIX_H_
 
 #include <cstdint>
 #include <string>
@@ -15,4 +15,4 @@ struct Matrix {
 
 Matrix read_matrix(const std::string path);
 
-#endif // READ_MATRIX_H_
+#endif // MATRIX_H_

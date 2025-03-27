@@ -1,4 +1,4 @@
-#include "read_matrix.h"
+#include "matrix.h"
 #include <cstdint>
 #include <cstring>
 #include <iostream>
