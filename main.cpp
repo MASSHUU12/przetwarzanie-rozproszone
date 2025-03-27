@@ -6,19 +6,27 @@
 
 int main(int argc, char **argv) {
   int32_t opt;
-  std::string in1 = "../m1.matrix", in2 = "../m2.matrix", out = "../out.matrix";
+  bool verbose = false;
+  std::string in1 = "../m1.matrix", in2 = "../m2.matrix", out = "";
 
-  while ((opt = getopt(argc, argv, "a:b:o:")) != -1) {
+  while ((opt = getopt(argc, argv, "a:b:o:v")) != -1) {
     switch (opt) {
-      case 'a':
-        in1 = optarg;
-      case 'b':
-        in2 = optarg;
-      case 'o':
-        out = optarg;
-      default:
-        std::cerr << "Usage: [ -a in_path ] [ -b in_path ] [ -o out_path ] <\n";
-        return 1;
+    case 'a':
+      in1 = optarg;
+      break;
+    case 'b':
+      in2 = optarg;
+      break;
+    case 'o':
+      out = optarg;
+      break;
+    case 'v':
+      verbose = true;
+      break;
+    default:
+      std::cerr
+          << "Usage: [ -a in_path ] [ -b in_path ] [ -o out_path ] [ -v ] \n";
+      return 1;
     }
   }
 
@@ -35,16 +43,23 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  std::cout << "rows: " << m1.rows << ' ' << "columns: " << m1.cols << '\n';
+  if (verbose) {
+    std::cout << "A:\n";
+    matrix_print(&m1);
 
-  for (uint16_t i = 0; i < m3.cols; i++) {
-    for (uint16_t j = 0; j < m3.rows; j++) {
-      std::cout << m3.items[i * m3.rows + j] << " ";
-    }
-    std::cout << '\n';
+    std::cout << "\nB:\n";
+    matrix_print(&m2);
+
+    std::cout << "\nResult:\n";
+    matrix_print(&m3);
   }
-
-  matrix_save("../out.matrix", &m3);
+  if (!out.empty()) {
+    if (matrix_save("../out.matrix", &m3)) {
+      std::cout << "Matrix saved to " << out << '\n';
+    } else {
+      std::cerr << "Unable to save matrix to " << out << '\n';
+    }
+  }
 
   return 0;
 }

@@ -20,7 +20,8 @@ struct Matrix {
 };
 
 Matrix matrix_read(const std::string path);
-bool matrix_save(const std::string path, const Matrix *matrix);
+bool matrix_save(const std::string path, const Matrix *mat);
 Matrix matrix_multiply(const Matrix *m1, const Matrix *m2);
+void matrix_print(const Matrix *m);
 
 #endif // MATRIX_H_

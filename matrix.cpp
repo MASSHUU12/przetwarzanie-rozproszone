@@ -111,3 +111,14 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
 
   return m;
 }
+
+void matrix_print(const Matrix *m) {
+  std::cout << "rows: " << m->rows << ' ' << "columns: " << m->cols << '\n';
+
+  for (uint16_t i = 0; i < m->cols; i++) {
+    for (uint16_t j = 0; j < m->rows; j++) {
+      std::cout << m->items[i * m->rows + j] << ' ';
+    }
+    std::cout << '\n';
+  }
+}
