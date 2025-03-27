@@ -25,7 +25,7 @@ Matrix matrix_read(const std::string path) {
     return matrix;
   }
 
-  matrix.items = new (std::nothrow) int32_t[matrix.rows * matrix.cols];
+  matrix.items = new (std::nothrow) int64_t[matrix.rows * matrix.cols];
   if (matrix.items == nullptr) {
     std::cerr << "Error: Buy more RAM.\n";
     return matrix;
@@ -89,7 +89,7 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
   m.rows = m2->rows;
   m.cols = m1->cols;
 
-  m.items = new (std::nothrow) int32_t[m.cols * m.rows];
+  m.items = new (std::nothrow) int64_t[m.cols * m.rows];
   if (m.items == nullptr) {
     std::cerr << "Error: Memory allocation failed\n";
     return m;

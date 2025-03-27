@@ -10,7 +10,7 @@ constexpr uint16_t MATRIX_SIZE_MIN = 0;
 constexpr uint16_t MATRIX_SIZE_MAX = 100;
 
 struct Matrix {
-  int32_t *items;
+  int64_t *items;
   uint16_t rows;
   uint16_t cols;
 
