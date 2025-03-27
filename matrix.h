@@ -14,5 +14,6 @@ struct Matrix {
 };
 
 Matrix read_matrix(const std::string path);
+bool save_matrix(const std::string path, const Matrix *matrix);
 
 #endif // MATRIX_H_

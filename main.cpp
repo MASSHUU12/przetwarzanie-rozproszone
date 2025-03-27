@@ -68,6 +68,8 @@ int main(int argc, char **argv) {
     std::cout << '\n';
   }
 
+  save_matrix("../out.matrix", &m3);
+
   delete[] m1.items;
   delete[] m2.items;
   delete[] m3.items;

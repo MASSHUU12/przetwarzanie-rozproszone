@@ -49,3 +49,28 @@ Matrix read_matrix(const std::string path) {
 
   return matrix;
 }
+
+bool save_matrix(const std::string path, const Matrix *mat) {
+  std::ofstream file(path);
+  if (!file.is_open()) {
+    std::cerr << "Error: Unable to save to a file " << path << '\n';
+    return false;
+  }
+
+  file << mat->cols << ' ' << mat->rows << '\n';
+
+  for (uint16_t i = 0; i < mat->cols; i++) {
+    for (uint16_t j = 0; j < mat->rows; j++) {
+      file << mat->items[i * mat->rows + j];
+
+      if (j < mat->rows - 1) {
+        file << ' ';
+      }
+    }
+    file << '\n';
+  }
+
+  file.close();
+
+  return true;
+}
