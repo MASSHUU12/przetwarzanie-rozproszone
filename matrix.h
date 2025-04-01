@@ -4,10 +4,12 @@
 #include <cstdint>
 #include <string>
 
-#define MATRIX_PARALLELIZE
+#define MATRIX_PARALLELIZE_FIRST
+// #define MATRIX_PARALLELIZE_SECOND
+// #define MATRIX_PARALLELIZE_THIRD
 
 constexpr uint16_t MATRIX_SIZE_MIN = 0;
-constexpr uint16_t MATRIX_SIZE_MAX = 100;
+constexpr uint16_t MATRIX_SIZE_MAX = 2000;
 
 struct Matrix {
   int64_t *items;

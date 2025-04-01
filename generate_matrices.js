@@ -40,8 +40,8 @@ function saveMatrixToFile(matrix, filename) {
   writeFileSync(filename, lines.join("\n"));
 }
 
-const rows = 100;
-const cols = 100;
+const rows = 1000;
+const cols = 1000;
 
 const matrixA = generateMatrixA(rows, cols);
 const matrixB = generateMatrixB(rows, cols);

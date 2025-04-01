@@ -97,11 +97,17 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
 
   std::memset(m.items, 0, sizeof(int32_t) * m.cols * m.rows);
 
-#ifdef MATRIX_PARALLELIZE
+#ifdef MATRIX_PARALLELIZE_FIRST
 #pragma omp parallel for
 #endif
   for (uint16_t i = 0; i < m1->rows; ++i) {
+#ifdef MATRIX_PARALLELIZE_SECOND
+#pragma omp parallel for
+#endif
     for (uint16_t j = 0; j < m2->cols; ++j) {
+#ifdef MATRIX_PARALLELIZE_THIRD
+#pragma omp parallel for
+#endif
       for (uint16_t k = 0; k < m1->cols; ++k) {
         m.items[i * m.cols + j] +=
             m1->items[i * m1->cols + k] * m2->items[k * m2->cols + j];
