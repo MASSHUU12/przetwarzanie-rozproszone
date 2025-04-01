@@ -1,29 +1,16 @@
 import { writeFileSync } from "fs";
 
-function generateMatrixA(rows, cols) {
-  const matrixA = [];
+function generateMatrix(rows, cols) {
+  const matrix = [];
   let value = 1;
   for (let i = 0; i < rows; i++) {
     const row = [];
     for (let j = 0; j < cols; j++) {
       row.push(value++);
     }
-    matrixA.push(row);
+    matrix.push(row);
   }
-  return matrixA;
-}
-
-function generateMatrixB(rows, cols) {
-  const matrixB = [];
-  let value = rows * cols;
-  for (let i = 0; i < rows; i++) {
-    const row = [];
-    for (let j = 0; j < cols; j++) {
-      row.push(value--);
-    }
-    matrixB.push(row);
-  }
-  return matrixB;
+  return matrix;
 }
 
 function saveMatrixToFile(matrix, filename) {
@@ -40,13 +27,13 @@ function saveMatrixToFile(matrix, filename) {
   writeFileSync(filename, lines.join("\n"));
 }
 
-const rows = 1000;
-const cols = 1000;
+const args = process.argv.slice(2);
+const rows = parseInt(args[0], 10) || 1000;
+const cols = parseInt(args[1], 10) || 1000;
+const matrixPath = args[2] || "./matrices/a.matrix";
 
-const matrixA = generateMatrixA(rows, cols);
-const matrixB = generateMatrixB(rows, cols);
+const matrix = generateMatrix(rows, cols);
 
-saveMatrixToFile(matrixA, "a.matrix");
-saveMatrixToFile(matrixB, "b.matrix");
+saveMatrixToFile(matrix, matrixPath);
 
-console.log("Matrices saved to a.matrix and b.matrix");
+console.log(`Matrix saved to ${matrixPath}`);
