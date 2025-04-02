@@ -16,7 +16,7 @@ Matrix matrix_read(const std::string path) {
     return matrix;
   }
 
-  file >> matrix.cols >> matrix.rows;
+  file >> matrix.rows >> matrix.cols;
 
   if (file.fail() || matrix.rows <= MATRIX_SIZE_MIN ||
       matrix.rows > MATRIX_SIZE_MAX || matrix.cols <= MATRIX_SIZE_MIN ||
@@ -31,12 +31,12 @@ Matrix matrix_read(const std::string path) {
     return matrix;
   }
 
-  for (uint16_t y = 0; y < matrix.cols; y++) {
-    for (uint16_t x = 0; x < matrix.rows; x++) {
-      file >> matrix.items[y * matrix.rows + x];
+  for (uint16_t i = 0; i < matrix.rows; i++) {
+    for (uint16_t j = 0; j < matrix.cols; j++) {
+      file >> matrix.items[i * matrix.cols + j];
       if (file.fail()) {
-        std::cerr << "Error: Failed to read matrix element at position (" << y
-                  << ", " << x << ")\n";
+        std::cerr << "Error: Failed to read matrix element at position (" << i
+                  << ", " << j << ")\n";
         matrix.items = nullptr;
         matrix.rows = 0;
         matrix.cols = 0;
@@ -46,7 +46,6 @@ Matrix matrix_read(const std::string path) {
   }
 
   file.close();
-
   return matrix;
 }
 
@@ -58,17 +57,18 @@ bool matrix_save(const std::string path, const Matrix *mat) {
   }
 
   file << mat->rows << ' ' << mat->cols << '\n';
+
   for (uint16_t i = 0; i < mat->rows; i++) {
     for (uint16_t j = 0; j < mat->cols; j++) {
       file << mat->items[i * mat->cols + j];
-      if (j < mat->cols - 1)
+      if (j < mat->cols - 1) {
         file << ' ';
+      }
     }
     file << '\n';
   }
 
   file.close();
-
   return true;
 }
 
@@ -86,16 +86,16 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
   m.rows = m1->rows;
   m.cols = m2->cols;
 
-  m.items = new (std::nothrow) int64_t[m.cols * m.rows];
+  m.items = new (std::nothrow) int64_t[m.rows * m.cols];
   if (m.items == nullptr) {
     std::cerr << "Error: Memory allocation failed\n";
     return m;
   }
 
-  std::memset(m.items, 0, sizeof(int64_t) * m.cols * m.rows);
+  std::memset(m.items, 0, sizeof(int64_t) * m.rows * m.cols);
 
 #ifdef MATRIX_PARALLELIZE_FIRST
-#pragma omp parallel for schedule(guided, 100)
+#pragma omp parallel for
 #endif
   for (uint16_t i = 0; i < m1->rows; ++i) {
 #ifdef MATRIX_PARALLELIZE_SECOND
@@ -116,8 +116,7 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
 }
 
 void matrix_print(const Matrix *m) {
-  std::cout << "rows: " << m->rows << ' ' << "columns: " << m->cols << '\n';
-
+  std::cout << "rows: " << m->rows << " columns: " << m->cols << '\n';
   for (uint16_t i = 0; i < m->rows; i++) {
     for (uint16_t j = 0; j < m->cols; j++) {
       std::cout << m->items[i * m->cols + j] << ' ';
