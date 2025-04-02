@@ -42,8 +42,18 @@ int main(int argc, char **argv) {
 
   omp_set_num_threads(threads);
 
-  const Matrix m1 = matrix_read(in1);
-  const Matrix m2 = matrix_read(in2);
+  Matrix m1, m2;
+#pragma omp parallel sections
+  {
+#pragma omp section
+    {
+      m1 = matrix_read(in1);
+    }
+#pragma omp section
+    {
+      m2 = matrix_read(in2);
+    }
+  }
 
   if (m1.items == nullptr || m2.items == nullptr) {
     return 1;

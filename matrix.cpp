@@ -57,15 +57,12 @@ bool matrix_save(const std::string path, const Matrix *mat) {
     return false;
   }
 
-  file << mat->cols << ' ' << mat->rows << '\n';
-
-  for (uint16_t i = 0; i < mat->cols; i++) {
-    for (uint16_t j = 0; j < mat->rows; j++) {
-      file << mat->items[i * mat->rows + j];
-
-      if (j < mat->rows - 1) {
+  file << mat->rows << ' ' << mat->cols << '\n';
+  for (uint16_t i = 0; i < mat->rows; i++) {
+    for (uint16_t j = 0; j < mat->cols; j++) {
+      file << mat->items[i * mat->cols + j];
+      if (j < mat->cols - 1)
         file << ' ';
-      }
     }
     file << '\n';
   }
@@ -86,8 +83,8 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
     return m;
   }
 
-  m.rows = m2->rows;
-  m.cols = m1->cols;
+  m.rows = m1->rows;
+  m.cols = m2->cols;
 
   m.items = new (std::nothrow) int64_t[m.cols * m.rows];
   if (m.items == nullptr) {
@@ -95,10 +92,10 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
     return m;
   }
 
-  std::memset(m.items, 0, sizeof(int32_t) * m.cols * m.rows);
+  std::memset(m.items, 0, sizeof(int64_t) * m.cols * m.rows);
 
 #ifdef MATRIX_PARALLELIZE_FIRST
-#pragma omp parallel for
+#pragma omp parallel for schedule(guided, 100)
 #endif
   for (uint16_t i = 0; i < m1->rows; ++i) {
 #ifdef MATRIX_PARALLELIZE_SECOND
@@ -121,9 +118,9 @@ Matrix matrix_multiply(const Matrix *m1, const Matrix *m2) {
 void matrix_print(const Matrix *m) {
   std::cout << "rows: " << m->rows << ' ' << "columns: " << m->cols << '\n';
 
-  for (uint16_t i = 0; i < m->cols; i++) {
-    for (uint16_t j = 0; j < m->rows; j++) {
-      std::cout << m->items[i * m->rows + j] << ' ';
+  for (uint16_t i = 0; i < m->rows; i++) {
+    for (uint16_t j = 0; j < m->cols; j++) {
+      std::cout << m->items[i * m->cols + j] << ' ';
     }
     std::cout << '\n';
   }
