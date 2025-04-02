@@ -3,8 +3,11 @@
 ## Specyfikacja
 
 **CPU**: AMD Ryzen™ 7 7735U with Radeon™ Graphics × 16
+
 **RAM**: 16.0 GiB
+
 **OS**: Fedora Linux 41 (Workstation Edition)
+
 **Kompilator**: clang version 19.1.7
 
 ## Zrównoleglenia pętli
@@ -164,3 +167,114 @@ std::cout << "Multiplication time: " << omp_get_wtime() - start << "s\n";
     }
   }
 ```
+
+## Analiza zależności
+
+### Opis obliczeń
+
+Dla macierzy $A$ i $B$ o wymiarach:
+- $A – m \times n$ (czyli $m1->rows = m$ oraz $m1->cols = n$),
+- $B – n \times p$ (czyli $m2->rows = n$ oraz $m2->cols = p$),
+
+wynikowa macierz $C$ (czyli macierz $m$ w kodzie) ma wymiar $m \times p$ i jej elementy definiowane są wzorem:
+
+$$
+C_{ij} = \sum_{k=0}^{n-1} A_{ik} \times B_{kj}.
+$$
+
+W algorytmie mamy trzy zagnieżdżone pętle:
+- **Pętla zewnętrzna $i$**: iteruje po wierszach macierzy $A$ ($i = 0, 1, \dots, m-1$).
+- **Pętla środkowa $j$**: iteruje po kolumnach macierzy $B$ ($j = 0, 1, \dots, p-1$).
+- **Pętla wewnętrzna $k$**: sumuje iloczyny $A_{ik} \times B_{kj}$ ($k = 0, 1, \dots, n-1$).
+
+### 1. Zależności między iteracjami pętli $i$ i $j$
+
+- **Independencja elementów macierzy \( C \)**:
+
+  Każdy element $C_{ij}$ jest obliczany jako suma:
+
+$$
+C_{ij} = \sum_{k=0}^{n-1} A_{ik} \times B_{kj}.
+$$
+
+  Dla różnych par $(i,j)$ nie ma zależności, gdyż:
+  - $C_{ij}$ jest zapisywane w unikalnym miejscu pamięci.
+  - Obliczenia dla $C_{ij}$ nie modyfikują elementów $C_{i'j'}$ dla $(i,j) \neq (i',j')$.
+
+  **Wniosek:** Pętle po indeksach $i$ oraz $j$ są *embarrassingly parallel* – każda iteracja (każde wyliczenie $C_{ij}$) jest niezależna od innych.
+
+### 2. Zależności w pętli $k$ (redukcja sumy)
+- **Konstrukcja redukcji:**
+
+  Wewnątrz pętli mamy obliczenie:
+
+$$
+C_{ij} = \text{inicjalizacja } 0 \quad \text{oraz} \quad C_{ij} \mathrel{+}= A_{ik} \times B_{kj} \quad \text{dla } k = 0 \dots n-1.
+$$
+
+  Możemy formalnie zapisać rekurencję:
+  
+$$
+s(0) = 0, \quad s(k+1) = s(k) + A_{ik} \times B_{kj}, \quad C_{ij} = s(n).
+$$
+
+  Każdy krok $k+1$ zależy od wyniku poprzedniego kroku $s(k)$. Istnieje więc *łańcuch zależności* – wynik kolejnej iteracji zależy od poprzedniej.
+
+- **Możliwość równoleglenia:**
+
+  Matematycznie, ponieważ dodawanie jest łączne i przemienne, można przeprowadzić redukcję w sposób równoległy, dzieląc zakres $k$ na podprzedziały:
+
+$$
+C_{ij} = \left(\sum_{k \in S_1} A_{ik} \times B_{kj}\right) + \left(\sum_{k \in S_2} A_{ik} \times B_{kj}\right),
+$$
+
+gdzie $S_1$ i $S_2$ są rozłączne i ich suma daje cały zakres $[0, n-1]$.
+
+  **Kluczowy aspekt:**
+  
+  Bez wyraźnie zaprojektowanej redukcji (np. mechanizmu sumowania częściowych wyników i późniejszego ich połączenia) próba równoleglenia pętli $k$ spowoduje:
+  
+  - Wystąpienie warunków wyścigu (race conditions) przy jednoczesnym zapisie do $C_{ij}$,
+  - Niedeterministyczne wyniki.
+
+  **Wniosek:** Pętla $k$ nie nadaje się do prostej równoległego wykonania, chyba że zostanie zastosowany algorytm redukcji (np. redukcja drzewiasta) gwarantujący poprawną kolejność i synchronizację sumowania.
+
+### Podsumowanie
+
+1. **Pętle $i$ i $j$:**
+
+   Dla dowolnych $(i,j)$ i $(i',j')$ takich, że $(i,j) \neq (i',j')$, mamy:
+
+$$
+C_{ij} = \sum_{k=0}^{n-1} A_{ik} \times B_{kj} \quad \text{oraz} \quad C_{i'j'} = \sum_{k=0}^{n-1} A_{i'k} \times B_{kj'},
+$$
+
+   przy czym operacje zapisu są niezależne, więc:
+   
+$$
+\forall (i,j) \neq (i',j')\quad C_{ij} \text{ i } C_{i'j'} \text{ są niezależne.}
+$$
+
+   **Wniosek:** Można równolegle obliczać różne $C_{ij}$.
+
+2. **Pętla $k$ – redukcja:**
+
+   Definiując:
+   
+$$
+s(0) = 0,\quad s(k+1) = s(k) + A_{ik} \times B_{kj},
+$$
+
+   mamy zależność:
+   
+$$
+s(k+1) \text{ zależy od } s(k).
+$$
+
+   Dlatego:
+   
+$$
+s(n) \text{ (czyli } C_{ij}\text{) nie może być obliczone równolegle w tradycyjny sposób bez mechanizmu redukcji.}
+$$
+
+   **Wniosek:** Pętla $k$ musi być traktowana jako sekwencyjna (lub przekształcona przy użyciu równoległej redukcji), ponieważ każda iteracja zależy od wyniku poprzedniej.
