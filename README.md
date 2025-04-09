@@ -1,4 +1,6 @@
-# Mnożenie macierzy
+# Analiza równoległego mnożenia macierzy
+
+Maciej Gawrysiak
 
 ## Specyfikacja
 
@@ -187,4 +189,4 @@ std::cout << "Multiplication time: " << omp_get_wtime() - start << "s\n";
 
 ## Analiza zależności
 
-![Analiza zależności](./zaleznosci.png)
+![Analiza zależności](https://raw.githubusercontent.com/MASSHUU12/przetwarzanie-rozproszone/refs/heads/master/zaleznosci.png)
