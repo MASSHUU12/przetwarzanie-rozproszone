@@ -190,3 +190,16 @@ std::cout << "Multiplication time: " << omp_get_wtime() - start << "s\n";
 ## Analiza zależności
 
 ![Analiza zależności](https://raw.githubusercontent.com/MASSHUU12/przetwarzanie-rozproszone/refs/heads/master/zaleznosci.png)
+
+## Wnioski
+
+Wyniki przeprowadzonych badań wskazują na to, że zrównoleglenie mnożenia macierzy
+może przynieść wielokrotną poprawę wydajności w porównaniu z mnożeniem sekwencyjnym,
+
+Najlepsze czasy dostarcza zrównoleglenie pierwszej pętli.
+Zrównoleglenie drugiej pętli przynosi gorsze rezultaty,
+ale wciąż lepsze niż mnożenie sekwencyjne.
+Zrównoleglenie trzeciej pętli powoduje błędne wyniki.
+
+Badania z użyciem różnych harmonogramów wskazują na nieznaczne różnice w czasach,
+ale odpowiedni dobór ustawień może przynieść nieznaczne lepsze wyniki.
