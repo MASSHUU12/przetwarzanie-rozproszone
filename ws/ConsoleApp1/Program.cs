@@ -1,8 +1,10 @@
-﻿using System;
+﻿using ConsoleApp1.MojService;
+using System;
 using System.IO;
+using System.Linq;
 using System.ServiceModel;
+using System.Threading;
 using System.Threading.Tasks;
-using ConsoleApp1.MojService;
 
 namespace ConsoleApp1
 {
@@ -10,130 +12,248 @@ namespace ConsoleApp1
     {
         static void Main()
         {
-            Task.WaitAll(
-                Task.Run(() => SingleMatrixAndMandelbrot(4, 4, 2, 300, 200, "mandelbrot1.bmp")),
-                Task.Run(() => SingleMatrixAndMandelbrot(5, 5, 5, 400, 300, "mandelbrot2.bmp")),
-                Task.Run(() => TwoMatricesMultiplyAndFetchChunks(3, 3, 2)),
-                Task.Run(() => TwoMatricesMultiplyAndFetchChunks(4, 2, 2))
-            );
+            Console.WriteLine("Starting enhanced test suite...\n");
 
-            Console.WriteLine("\nAll tasks completed.\n");
+            var tests = new Task[]
+            {
+                Task.Run(() => RandomMatricesMultiplyAndValidate(50, 50,   5,    1234)),
+                Task.Run(() => EdgeCaseMatrixCreation(0,   10)),
+                Task.Run(() => EdgeCaseMatrixCreation(-1,  -1)),
+                Task.Run(() => StressTestLargeMatrix(200, 200,  50)),
+                Task.Run(() => MandelbrotRaw("mandel_raw.bmp")),
+                Task.Run(() => MandelbrotStream("mandel_stream.bmp")),
+                Task.Run(() => MandelbrotTimeoutTest( 10 /*polls*/, 100 /*ms*/ ))
+            };
+
+            Task.WaitAll(tests);
+            Console.WriteLine("\nAll enhanced tests completed.");
         }
 
-        static void SingleMatrixAndMandelbrot(int rows, int cols, int chunksCount, int imgW, int imgH, string imgFile)
+        #region Matrix Tests
+
+        static void RandomMatricesMultiplyAndValidate(int rows, int cols, int chunksCount, int seed)
         {
+            var rnd = new Random(seed);
+            double[] A = Enumerable.Range(0, rows * cols).Select(_ => rnd.NextDouble() * 10).ToArray();
+            double[] B = Enumerable.Range(0, rows * cols).Select(_ => rnd.NextDouble() * 10).ToArray();
+
             var client = new Service1Client();
 
-            var matrixResp = client.CreateMatrix(new CreateMatrixRequest { Rows = rows, Columns = cols });
-            Guid matrixId = matrixResp.MatrixId;
-            SendMatrixInChunks(client, matrixId, rows, cols, chunksCount);
+            // create & upload A
+            var aId = client.CreateMatrixAsync(new CreateMatrixRequest { Rows = rows, Columns = cols })
+                            .Result.MatrixId;
+            UploadInChunks(client, aId, rows, cols, chunksCount, A);
 
-            Console.WriteLine($"[{matrixId}] Matrix send.");
+            // create & upload B (dims swapped so A×B is valid)
+            var bId = client.CreateMatrixAsync(new CreateMatrixRequest { Rows = cols, Columns = rows })
+                            .Result.MatrixId;
+            UploadInChunks(client, bId, cols, rows, chunksCount, B);
 
-            var mbResp = client.GenerateMandelbrot(new MandelbrotRequest
+            // multiply
+            var resultId = client.MultiplyMatricesAsync(new MultiplyRequest
             {
-                Width = imgW,
-                Height = imgH,
-                XMin = -2.0,
-                XMax = 1.0,
-                YMin = -1.0,
-                YMax = 1.0,
-                MaxIterations = 500
-            });
+                LeftMatrixId = aId,
+                RightMatrixId = bId
+            }).Result.ResultMatrixId;
 
-            byte[] imageBytes;
+            // poll until ready
+            MatrixDto svcRes;
             while (true)
             {
                 try
                 {
-                    imageBytes = client.GetMandelbrotRaw(mbResp.ImageId.ToString());
+                    svcRes = client.GetMatrixAsync(resultId.ToString()).Result;
                     break;
                 }
-                catch (FaultException<string> fe) when (fe.Code.Name == "Accepted")
+                catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
                 {
-                    Task.Delay(200).Wait();
+                    Thread.Sleep(100);
                 }
             }
 
-            File.WriteAllBytes(imgFile, imageBytes);
-            Console.WriteLine($"[{matrixId}] Mandelbrot saved: {imgFile}");
+            // local multiply
+            var local = new double[rows * rows];
+            for (int i = 0; i < rows; i++)
+                for (int j = 0; j < rows; j++)
+                    for (int k = 0; k < cols; k++)
+                        local[i * rows + j] += A[i * cols + k] * B[k * rows + j];
+
+            bool pass = local.SequenceEqual(svcRes.Data);
+            Console.WriteLine(pass
+                ? $"[PASS] RandomMultiply {rows}×{cols}"
+                : $"[FAIL] RandomMultiply {rows}×{cols}: mismatch");
+
             client.Close();
         }
 
-        static void TwoMatricesMultiplyAndFetchChunks(int size, int chunksCount, int resultChunks)
+        static void EdgeCaseMatrixCreation(int rows, int cols)
         {
             var client = new Service1Client();
-
-            var respA = client.CreateMatrix(new CreateMatrixRequest { Rows = size, Columns = size });
-            Guid matrixA = respA.MatrixId;
-            SendMatrixInChunks(client, matrixA, size, size, chunksCount);
-
-            var respB = client.CreateMatrix(new CreateMatrixRequest { Rows = size, Columns = size });
-            Guid matrixB = respB.MatrixId;
-            SendMatrixInChunks(client, matrixB, size, size, chunksCount);
-
-            Console.WriteLine($"[{matrixA}] Matrix A i B send.");
-
-            var mulResp = client.MultiplyMatrices(new MultiplyRequest
+            try
             {
-                LeftMatrixId = matrixA,
-                RightMatrixId = matrixB
-            });
-            Guid resultId = mulResp.ResultMatrixId;
-
-            MatrixDto resultMatrix;
-            while (true)
-            {
-                try
-                {
-                    resultMatrix = client.GetMatrix(resultId.ToString());
-                    break;
-                }
-                catch (FaultException<string> fe) when (fe.Code.Name == "Accepted")
-                {
-                    Task.Delay(200).Wait();
-                }
+                // will throw on invalid dims
+                client.CreateMatrixAsync(new CreateMatrixRequest { Rows = rows, Columns = cols }).Wait();
+                Console.WriteLine($"[FAIL] EdgeCase {rows}×{cols}: expected fault");
             }
+            catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "InvalidArgument")
+            {
+                Console.WriteLine($"[PASS] EdgeCase {rows}×{cols}: correctly faulted");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] EdgeCase {rows}×{cols}: unexpected {ex.GetType().Name}");
+            }
+            finally
+            {
+                client.Close();
+            }
+        }
 
-            Console.WriteLine($"[{matrixA}] Got resulting matrix:");
-            PrintMatrix(resultMatrix);
+        static void StressTestLargeMatrix(int rows, int cols, int chunksCount)
+        {
+            var client = new Service1Client();
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            var resp = client.CreateMatrixAsync(new CreateMatrixRequest { Rows = rows, Columns = cols })
+                             .Result;
+            UploadInChunks(client, resp.MatrixId, rows, cols, chunksCount);
+
+            sw.Stop();
+            Console.WriteLine($"[STRESS] {rows}×{cols} in {chunksCount} chunks → {sw.ElapsedMilliseconds} ms");
             client.Close();
         }
 
-        static void PrintMatrix(MatrixDto matrix)
+        static void UploadInChunks(Service1Client client, Guid matrixId, int rows, int cols, int chunksCount, double[] data = null)
         {
-            for (int i = 0; i < matrix.Rows; i++)
-            {
-                for (int j = 0; j < matrix.Columns; j++)
-                    Console.Write(matrix.Data[i * matrix.Columns + j] + "\t");
-                Console.WriteLine();
-            }
-        }
+            int len = rows * cols;
+            double[] buf = data ?? Enumerable.Range(1, len).Select(i => (double)i).ToArray();
+            int chunkSz = len / chunksCount;
 
-        static void SendMatrixInChunks(Service1Client client, Guid matrixId, int rows, int cols, int chunksCount, double[] predefinedData = null)
-        {
-            double[] data = predefinedData ?? new double[rows * cols];
-            if (predefinedData == null)
+            for (int i = 0; i < chunksCount; i++)
             {
-                for (int i = 0; i < data.Length; i++)
-                    data[i] = i + 1;
-            }
-
-            int chunkSize = data.Length / chunksCount;
-            for (int idx = 0; idx < chunksCount; idx++)
-            {
-                int offset = idx * chunkSize;
-                int len = (idx == chunksCount - 1) ? data.Length - offset : chunkSize;
+                int off = i * chunkSz;
+                int take = (i == chunksCount - 1) ? len - off : chunkSz;
                 var chunk = new MatrixChunk
                 {
-                    ChunkIndex = idx,
+                    ChunkIndex = i,
                     TotalChunks = chunksCount,
-                    Data = new double[len]
+                    Data = buf.Skip(off).Take(take).ToArray()
                 };
-                Array.Copy(data, offset, chunk.Data, 0, len);
                 client.UploadMatrixChunk(matrixId.ToString(), chunk);
-                Console.WriteLine($"[{matrixId}] Chunk {idx + 1}/{chunksCount} send.");
+                Console.WriteLine($"  [chunk] {matrixId:N} {i + 1}/{chunksCount}");
             }
         }
+        #endregion
+
+        #region Mandelbrot Tests
+
+        static void MandelbrotRaw(string fileName)
+        {
+            var client = new Service1Client();
+            var imgId = client.GenerateMandelbrotAsync(new MandelbrotRequest
+            {
+                Width = 300,
+                Height = 200,
+                XMin = -2,
+                XMax = 1,
+                YMin = -1,
+                YMax = 1,
+                MaxIterations = 300
+            }).Result.ImageId;
+
+            // poll raw endpoint
+            byte[] img = null;
+            while (true)
+            {
+                try
+                {
+                    img = client.GetMandelbrotRawAsync(imgId.ToString()).Result;
+                    break;
+                }
+                catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
+                {
+                    Thread.Sleep(200);
+                }
+            }
+
+            File.WriteAllBytes(fileName, img);
+            Console.WriteLine($"[MB] Raw → {fileName}");
+            client.Close();
+        }
+
+        static void MandelbrotStream(string fileName)
+        {
+            var client = new Service1Client();
+            var imgId = client.GenerateMandelbrotAsync(new MandelbrotRequest
+            {
+                Width = 400,
+                Height = 400,
+                XMin = -0.75,
+                XMax = -0.74,
+                YMin = 0.1,
+                YMax = 0.11,
+                MaxIterations = 1000
+            }).Result.ImageId;
+
+            // poll streaming endpoint
+            Stream s = null;
+            while (true)
+            {
+                try
+                {
+                    s = client.GetMandelbrotAsync(imgId.ToString()).Result;
+                    break;
+                }
+                catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
+                {
+                    Thread.Sleep(200);
+                }
+            }
+
+            using (var fs = File.OpenWrite(fileName))
+                s.CopyTo(fs);
+
+            Console.WriteLine($"[MB] Stream → {fileName}");
+            client.Close();
+        }
+
+        static void MandelbrotTimeoutTest(int maxPolls, int delayMs)
+        {
+            var client = new Service1Client();
+            var imgId = client.GenerateMandelbrotAsync(new MandelbrotRequest
+            {
+                Width = 2000,
+                Height = 2000,
+                XMin = -2,
+                XMax = 1,
+                YMin = -1,
+                YMax = 1,
+                MaxIterations = 5000
+            }).Result.ImageId;
+
+            int polls = 0;
+            try
+            {
+                while (polls++ < maxPolls)
+                {
+                    try
+                    {
+                        var _ = client.GetMandelbrotRawAsync(imgId.ToString()).Result;
+                        Console.WriteLine($"[MB] Completed on poll {polls}");
+                        return;
+                    }
+                    catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
+                    {
+                        Thread.Sleep(delayMs);
+                    }
+                }
+                Console.WriteLine($"[MB] Timeout after {maxPolls} polls (gave up)");
+            }
+            finally
+            {
+                client.Close();
+            }
+        }
+        #endregion
     }
 }
