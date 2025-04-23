@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Service1" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://localhost:35407/Service1.svc?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://localhost:35407/Service1.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:35407/Service1.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/WcfService1" />
+      <xsd:import schemaLocation="http://localhost:35407/Service1.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import schemaLocation="http://localhost:35407/Service1.svc?xsd=xsd4" namespace="http://schemas.microsoft.com/Message" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IService1_GetData_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetData" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetData_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetDataUsingDataContract_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetDataUsingDataContract" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetDataUsingDataContract_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetDataUsingDataContractResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_TEST_InputMessage">
+    <wsdl:part name="parameters" element="tns:TEST" />
+  </wsdl:message>
+  <wsdl:message name="IService1_TEST_OutputMessage">
+    <wsdl:part name="parameters" element="tns:TESTResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_TEST1_InputMessage">
+    <wsdl:part name="parameters" element="tns:TEST1" />
+  </wsdl:message>
+  <wsdl:message name="IService1_TEST1_OutputMessage">
+    <wsdl:part name="parameters" element="tns:TEST1Response" />
+  </wsdl:message>
+  <wsdl:message name="IService1_CreateMatrix_InputMessage">
+    <wsdl:part name="parameters" element="tns:CreateMatrix" />
+  </wsdl:message>
+  <wsdl:message name="IService1_CreateMatrix_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CreateMatrixResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_UploadMatrixChunk_InputMessage">
+    <wsdl:part name="parameters" element="tns:UploadMatrixChunk" />
+  </wsdl:message>
+  <wsdl:message name="IService1_UploadMatrixChunk_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UploadMatrixChunkResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetMatrix_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMatrix" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetMatrix_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMatrixResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_MultiplyMatrices_InputMessage">
+    <wsdl:part name="parameters" element="tns:MultiplyMatrices" />
+  </wsdl:message>
+  <wsdl:message name="IService1_MultiplyMatrices_OutputMessage">
+    <wsdl:part name="parameters" element="tns:MultiplyMatricesResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GenerateMandelbrot_InputMessage">
+    <wsdl:part name="parameters" element="tns:GenerateMandelbrot" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GenerateMandelbrot_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GenerateMandelbrotResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetMandelbrot_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMandelbrot" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetMandelbrot_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMandelbrotResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetMandelbrotRaw_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMandelbrotRaw" />
+  </wsdl:message>
+  <wsdl:message name="IService1_GetMandelbrotRaw_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMandelbrotRawResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IService1">
+    <wsdl:operation name="GetData">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/GetData" message="tns:IService1_GetData_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/GetDataResponse" message="tns:IService1_GetData_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDataUsingDataContract">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/GetDataUsingDataContract" message="tns:IService1_GetDataUsingDataContract_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/GetDataUsingDataContractResponse" message="tns:IService1_GetDataUsingDataContract_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="TEST">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/TEST" message="tns:IService1_TEST_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/TESTResponse" message="tns:IService1_TEST_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="TEST1">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/TEST1" message="tns:IService1_TEST1_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/TEST1Response" message="tns:IService1_TEST1_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateMatrix">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/CreateMatrix" message="tns:IService1_CreateMatrix_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/CreateMatrixResponse" message="tns:IService1_CreateMatrix_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadMatrixChunk">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/UploadMatrixChunk" message="tns:IService1_UploadMatrixChunk_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/UploadMatrixChunkResponse" message="tns:IService1_UploadMatrixChunk_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMatrix">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/GetMatrix" message="tns:IService1_GetMatrix_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/GetMatrixResponse" message="tns:IService1_GetMatrix_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="MultiplyMatrices">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/MultiplyMatrices" message="tns:IService1_MultiplyMatrices_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/MultiplyMatricesResponse" message="tns:IService1_MultiplyMatrices_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GenerateMandelbrot">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/GenerateMandelbrot" message="tns:IService1_GenerateMandelbrot_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/GenerateMandelbrotResponse" message="tns:IService1_GenerateMandelbrot_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMandelbrot">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/GetMandelbrot" message="tns:IService1_GetMandelbrot_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/GetMandelbrotResponse" message="tns:IService1_GetMandelbrot_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMandelbrotRaw">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService1/GetMandelbrotRaw" message="tns:IService1_GetMandelbrotRaw_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService1/GetMandelbrotRawResponse" message="tns:IService1_GetMandelbrotRaw_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_IService1" type="tns:IService1">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetData">
+      <soap:operation soapAction="http://tempuri.org/IService1/GetData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataUsingDataContract">
+      <soap:operation soapAction="http://tempuri.org/IService1/GetDataUsingDataContract" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TEST">
+      <soap:operation soapAction="http://tempuri.org/IService1/TEST" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TEST1">
+      <soap:operation soapAction="http://tempuri.org/IService1/TEST1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateMatrix">
+      <soap:operation soapAction="http://tempuri.org/IService1/CreateMatrix" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadMatrixChunk">
+      <soap:operation soapAction="http://tempuri.org/IService1/UploadMatrixChunk" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMatrix">
+      <soap:operation soapAction="http://tempuri.org/IService1/GetMatrix" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MultiplyMatrices">
+      <soap:operation soapAction="http://tempuri.org/IService1/MultiplyMatrices" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerateMandelbrot">
+      <soap:operation soapAction="http://tempuri.org/IService1/GenerateMandelbrot" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMandelbrot">
+      <soap:operation soapAction="http://tempuri.org/IService1/GetMandelbrot" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMandelbrotRaw">
+      <soap:operation soapAction="http://tempuri.org/IService1/GetMandelbrotRaw" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Service1">
+    <wsdl:port name="BasicHttpBinding_IService1" binding="tns:BasicHttpBinding_IService1">
+      <soap:address location="http://localhost:35407/Service1.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

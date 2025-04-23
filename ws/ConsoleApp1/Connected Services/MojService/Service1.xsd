@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:tns="http://schemas.datacontract.org/2004/07/WcfService1" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/WcfService1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:35407/Service1.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:import schemaLocation="http://localhost:35407/Service1.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:complexType name="CompositeType">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="BoolValue" type="xs:boolean" />
+      <xs:element minOccurs="0" name="StringValue" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CompositeType" nillable="true" type="tns:CompositeType" />
+  <xs:complexType name="CreateMatrixRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Columns" type="xs:int" />
+      <xs:element minOccurs="0" name="Rows" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CreateMatrixRequest" nillable="true" type="tns:CreateMatrixRequest" />
+  <xs:complexType name="CreateMatrixResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="MatrixId" type="ser:guid" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CreateMatrixResponse" nillable="true" type="tns:CreateMatrixResponse" />
+  <xs:complexType name="MatrixChunk">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ChunkIndex" type="xs:int" />
+      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Data" nillable="true" type="q1:ArrayOfdouble" />
+      <xs:element minOccurs="0" name="TotalChunks" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MatrixChunk" nillable="true" type="tns:MatrixChunk" />
+  <xs:complexType name="MatrixDto">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Columns" type="xs:int" />
+      <xs:element xmlns:q2="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Data" nillable="true" type="q2:ArrayOfdouble" />
+      <xs:element minOccurs="0" name="Rows" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MatrixDto" nillable="true" type="tns:MatrixDto" />
+  <xs:complexType name="MultiplyRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="LeftMatrixId" type="ser:guid" />
+      <xs:element minOccurs="0" name="RightMatrixId" type="ser:guid" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MultiplyRequest" nillable="true" type="tns:MultiplyRequest" />
+  <xs:complexType name="MultiplyResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ResultMatrixId" type="ser:guid" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MultiplyResponse" nillable="true" type="tns:MultiplyResponse" />
+  <xs:complexType name="MandelbrotRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Height" type="xs:int" />
+      <xs:element minOccurs="0" name="MaxIterations" type="xs:int" />
+      <xs:element minOccurs="0" name="Width" type="xs:int" />
+      <xs:element minOccurs="0" name="XMax" type="xs:double" />
+      <xs:element minOccurs="0" name="XMin" type="xs:double" />
+      <xs:element minOccurs="0" name="YMax" type="xs:double" />
+      <xs:element minOccurs="0" name="YMin" type="xs:double" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MandelbrotRequest" nillable="true" type="tns:MandelbrotRequest" />
+  <xs:complexType name="MandelbrotResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ImageId" type="ser:guid" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MandelbrotResponse" nillable="true" type="tns:MandelbrotResponse" />
+</xs:schema>
