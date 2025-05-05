@@ -35,7 +35,7 @@ namespace WcfService1
         Task<MandelbrotResponse> GenerateMandelbrotAsync(MandelbrotRequest req);
 
         [OperationContract]
-        [WebGet(UriTemplate = "mandelbrot/{imageId}")]
+        //[WebGet(UriTemplate = "mandelbrot/{imageId}")]
         Task<Stream> GetMandelbrotAsync(string imageId);
 
         [OperationContract]

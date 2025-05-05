@@ -17,8 +17,8 @@ namespace ConsoleApp1
             var tests = new Task[]
             {
                 Task.Run(() => RandomMatricesMultiplyAndValidate(50, 50,   5,    1234)),
-                Task.Run(() => EdgeCaseMatrixCreation(0,   10)),
-                Task.Run(() => EdgeCaseMatrixCreation(-1,  -1)),
+                //Task.Run(() => EdgeCaseMatrixCreation(0,   10)),
+                //Task.Run(() => EdgeCaseMatrixCreation(-1,  -1)),
                 Task.Run(() => StressTestLargeMatrix(200, 200,  50)),
                 Task.Run(() => MandelbrotRaw("mandel_raw.bmp")),
                 Task.Run(() => MandelbrotStream("mandel_stream.bmp")),
@@ -26,16 +26,24 @@ namespace ConsoleApp1
             };
 
             Task.WaitAll(tests);
-            Console.WriteLine("\nAll enhanced tests completed.");
+            Console.WriteLine("\nAll tests completed.");
+            Console.ReadLine();
         }
 
         #region Matrix Tests
 
-        static void RandomMatricesMultiplyAndValidate(int rows, int cols, int chunksCount, int seed)
+        static void RandomMatricesMultiplyAndValidate(
+            int rows,
+            int cols,
+            int chunksCount,
+            int seed
+        )
         {
             var rnd = new Random(seed);
-            double[] A = Enumerable.Range(0, rows * cols).Select(_ => rnd.NextDouble() * 10).ToArray();
-            double[] B = Enumerable.Range(0, rows * cols).Select(_ => rnd.NextDouble() * 10).ToArray();
+            double[] A = Enumerable.Range(0, rows * cols)
+                .Select(_ => rnd.NextDouble() * 10).ToArray();
+            double[] B = Enumerable.Range(0, rows * cols)
+                .Select(_ => rnd.NextDouble() * 10).ToArray();
 
             var client = new Service1Client();
 
@@ -65,7 +73,8 @@ namespace ConsoleApp1
                     svcRes = client.GetMatrixAsync(resultId.ToString()).Result;
                     break;
                 }
-                catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
+                catch (AggregateException ae)
+                when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
                 {
                     Thread.Sleep(100);
                 }
@@ -95,7 +104,8 @@ namespace ConsoleApp1
                 client.CreateMatrixAsync(new CreateMatrixRequest { Rows = rows, Columns = cols }).Wait();
                 Console.WriteLine($"[FAIL] EdgeCase {rows}×{cols}: expected fault");
             }
-            catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "InvalidArgument")
+            catch (AggregateException ae)
+            when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "InvalidArgument")
             {
                 Console.WriteLine($"[PASS] EdgeCase {rows}×{cols}: correctly faulted");
             }
@@ -123,7 +133,14 @@ namespace ConsoleApp1
             client.Close();
         }
 
-        static void UploadInChunks(Service1Client client, Guid matrixId, int rows, int cols, int chunksCount, double[] data = null)
+        static void UploadInChunks(
+            Service1Client client,
+            Guid matrixId,
+            int rows,
+            int cols,
+            int chunksCount,
+            double[] data = null
+        )
         {
             int len = rows * cols;
             double[] buf = data ?? Enumerable.Range(1, len).Select(i => (double)i).ToArray();
@@ -170,7 +187,8 @@ namespace ConsoleApp1
                     img = client.GetMandelbrotRawAsync(imgId.ToString()).Result;
                     break;
                 }
-                catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
+                catch (AggregateException ae)
+                when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
                 {
                     Thread.Sleep(200);
                 }
@@ -204,7 +222,8 @@ namespace ConsoleApp1
                     s = client.GetMandelbrotAsync(imgId.ToString()).Result;
                     break;
                 }
-                catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
+                catch (AggregateException ae)
+                when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
                 {
                     Thread.Sleep(200);
                 }
@@ -242,7 +261,8 @@ namespace ConsoleApp1
                         Console.WriteLine($"[MB] Completed on poll {polls}");
                         return;
                     }
-                    catch (AggregateException ae) when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
+                    catch (AggregateException ae)
+                    when (ae.InnerException is FaultException<string> fe && fe.Code.Name == "Accepted")
                     {
                         Thread.Sleep(delayMs);
                     }

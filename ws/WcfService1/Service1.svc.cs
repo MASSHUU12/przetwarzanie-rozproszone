@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 
 namespace WcfService1
 {
@@ -27,6 +28,9 @@ namespace WcfService1
 
         public Task<CreateMatrixResponse> CreateMatrixAsync(CreateMatrixRequest req)
         {
+            if (req.Rows <= 0 || req.Columns <= 0)
+                throw new FaultException<string>("Rows and Columns must be > 0", "InvalidArgument");
+
             var id = Guid.NewGuid();
             _chunkManagers[id] = new MatrixChunkManager(req.Rows, req.Columns);
             _matrices[id] = new TaskCompletionSource<MatrixDto>();
@@ -35,7 +39,9 @@ namespace WcfService1
 
         public void UploadMatrixChunk(string matrixId, MatrixChunk chunk)
         {
-            var id = Guid.Parse(matrixId);
+            if (!Guid.TryParse(matrixId, out var id))
+                throw new FaultException<string>("Invalid matrixId format", "InvalidArgument");
+
             if (!_chunkManagers.TryGetValue(id, out var manager))
                 throw new WebFaultException(HttpStatusCode.NotFound);
 
@@ -56,14 +62,19 @@ namespace WcfService1
 
         public async Task<MatrixDto> GetMatrixAsync(string matrixId)
         {
-            var id = Guid.Parse(matrixId);
+            if (!Guid.TryParse(matrixId, out var id))
+                throw new FaultException<string>("Invalid matrixId format", "InvalidArgument");
             if (!_matrices.TryGetValue(id, out var tcs))
                 throw new WebFaultException(HttpStatusCode.NotFound);
+
             return await tcs.Task.ConfigureAwait(false);
         }
 
         public Task<MultiplyResponse> MultiplyMatricesAsync(MultiplyRequest req)
         {
+            if (req.LeftMatrixId == Guid.Empty || req.RightMatrixId == Guid.Empty)
+                throw new FaultException<string>("Matrix IDs cannot be empty", "InvalidArgument");
+
             var id = Guid.NewGuid();
             var tcs = new TaskCompletionSource<MatrixDto>();
             _matrices[id] = tcs;
@@ -82,6 +93,9 @@ namespace WcfService1
 
         public Task<MandelbrotResponse> GenerateMandelbrotAsync(MandelbrotRequest req)
         {
+            if (req.Width <= 0 || req.Height <= 0)
+                throw new FaultException<string>("Invalid image dimensions", "InvalidArgument");
+
             var id = Guid.NewGuid();
             var tcs = new TaskCompletionSource<byte[]>();
             _fractals[id] = tcs;
@@ -94,17 +108,34 @@ namespace WcfService1
 
         public async Task<Stream> GetMandelbrotAsync(string imageId)
         {
-            var id = Guid.Parse(imageId);
+            if (!Guid.TryParse(imageId, out var id))
+                throw new FaultException<string>("Invalid ImageId", "InvalidArgument");
+
             if (!_fractals.TryGetValue(id, out var tcs))
                 throw new WebFaultException(HttpStatusCode.NotFound);
-            var bytes = await tcs.Task;
-            WebOperationContext.Current.OutgoingResponse.ContentType = "image/png";
+
+            var bytes = await tcs.Task.ConfigureAwait(false);
+            // Only set headers if we're actually in a Web context
+            if (OperationContext.Current != null)
+            {
+                var http = OperationContext.Current.OutgoingMessageProperties
+                                .ContainsKey(HttpResponseMessageProperty.Name)
+                            ? (HttpResponseMessageProperty)OperationContext.Current.OutgoingMessageProperties[HttpResponseMessageProperty.Name]
+                            : new HttpResponseMessageProperty();
+
+                http.Headers[HttpResponseHeader.ContentType] = "image/png";
+                OperationContext.Current.OutgoingMessageProperties[HttpResponseMessageProperty.Name] = http;
+            }
+
+            // Return the raw bytes in a MemoryStream; WCF will wrap it in SOAP for you
             return new MemoryStream(bytes);
         }
 
         public async Task<byte[]> GetMandelbrotRawAsync(string imageId)
         {
-            var id = Guid.Parse(imageId);
+            if (!Guid.TryParse(imageId, out var id))
+                throw new FaultException<string>("Invalid ImageId", "InvalidArgument");
+
             if (!_fractals.TryGetValue(id, out var tcs))
                 throw new WebFaultException(HttpStatusCode.NotFound);
             return await tcs.Task;
