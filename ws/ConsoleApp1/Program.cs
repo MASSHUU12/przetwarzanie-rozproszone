@@ -12,7 +12,7 @@ namespace ConsoleApp1
     {
         static void Main()
         {
-            Console.WriteLine("Starting enhanced test suite...\n");
+            Console.WriteLine("Starting test suite...\n");
 
             var tests = new Task[]
             {
@@ -129,7 +129,7 @@ namespace ConsoleApp1
             UploadInChunks(client, resp.MatrixId, rows, cols, chunksCount);
 
             sw.Stop();
-            Console.WriteLine($"[STRESS] {rows}×{cols} in {chunksCount} chunks → {sw.ElapsedMilliseconds} ms");
+            Console.WriteLine($"[STRESS] {rows}×{cols} in {chunksCount} chunks -> {sw.ElapsedMilliseconds} ms");
             client.Close();
         }
 
@@ -175,7 +175,8 @@ namespace ConsoleApp1
                 XMax = 1,
                 YMin = -1,
                 YMax = 1,
-                MaxIterations = 300
+                MaxIterations = 300,
+                Threads = 4
             }).Result.ImageId;
 
             // poll raw endpoint
@@ -195,7 +196,7 @@ namespace ConsoleApp1
             }
 
             File.WriteAllBytes(fileName, img);
-            Console.WriteLine($"[MB] Raw → {fileName}");
+            Console.WriteLine($"[MB] Raw -> {fileName}");
             client.Close();
         }
 
@@ -210,7 +211,8 @@ namespace ConsoleApp1
                 XMax = -0.74,
                 YMin = 0.1,
                 YMax = 0.11,
-                MaxIterations = 1000
+                MaxIterations = 1000,
+                Threads = 4
             }).Result.ImageId;
 
             // poll streaming endpoint
@@ -232,7 +234,7 @@ namespace ConsoleApp1
             using (var fs = File.OpenWrite(fileName))
                 s.CopyTo(fs);
 
-            Console.WriteLine($"[MB] Stream → {fileName}");
+            Console.WriteLine($"[MB] Stream -> {fileName}");
             client.Close();
         }
 
@@ -247,7 +249,8 @@ namespace ConsoleApp1
                 XMax = 1,
                 YMin = -1,
                 YMax = 1,
-                MaxIterations = 5000
+                MaxIterations = 5000,
+                Threads = 4
             }).Result.ImageId;
 
             int polls = 0;

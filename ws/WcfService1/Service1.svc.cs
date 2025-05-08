@@ -95,13 +95,20 @@ namespace WcfService1
         {
             if (req.Width <= 0 || req.Height <= 0)
                 throw new FaultException<string>("Invalid image dimensions", "InvalidArgument");
+            if (req.Threads <= 0)
+                throw new FaultException<string>("Threads must be > 0", "InvalidArgument");
 
             var id = Guid.NewGuid();
             var tcs = new TaskCompletionSource<byte[]>();
             _fractals[id] = tcs;
 
             _ = Task.Run(() =>
-                tcs.SetResult(FractalOps.RenderPng(req.Width, req.Height, req.XMin, req.XMax, req.YMin, req.YMax, req.MaxIterations)));
+                tcs.SetResult(FractalOps.RenderPng(
+                    req.Width, req.Height,
+                    req.XMin, req.XMax,
+                    req.YMin, req.YMax,
+                    req.MaxIterations,
+                    req.Threads)));
 
             return Task.FromResult(new MandelbrotResponse(id));
         }
@@ -179,36 +186,70 @@ namespace WcfService1
     static class FractalOps
     {
         public static byte[] RenderPng(
-            int w, int h,
+            int width, int height,
             double xmin, double xmax,
             double ymin, double ymax,
-            int maxIter)
+            int maxIter,
+            int threads)
         {
-            using (Bitmap bmp = new Bitmap(w, h))
+            var bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            var tasks = new Task[threads];
+            int rowsPerTask = height / threads;
+            object bmpLock = new object();
+
+            for (int t = 0; t < threads; t++)
             {
-                for (int py = 0; py < h; py++)
+                int taskIndex = t;
+                int yStart = taskIndex * rowsPerTask;
+                int yEnd = (taskIndex == threads - 1) ? height : yStart + rowsPerTask;
+
+                int idx = taskIndex + 1;
+                Color baseColor = Color.FromArgb(
+                    (idx * 64) % 256,
+                    (idx * 128) % 256,
+                    (idx * 192) % 256
+                );
+
+                tasks[t] = Task.Run(() =>
                 {
-                    double y0 = ymin + (ymax - ymin) * py / (h - 1);
-                    for (int px = 0; px < w; px++)
+                    for (int py = yStart; py < yEnd; py++)
                     {
-                        double x0 = xmin + (xmax - xmin) * px / (w - 1);
-                        double x = 0, y = 0; int iter = 0;
-                        while (x * x + y * y <= 4 && iter < maxIter)
+                        double y0 = ymin + (ymax - ymin) * py / (height - 1);
+                        for (int px = 0; px < width; px++)
                         {
-                            double xt = x * x - y * y + x0;
-                            y = 2 * x * y + y0;
-                            x = xt;
-                            iter++;
+                            double x0 = xmin + (xmax - xmin) * px / (width - 1);
+                            double x = 0, y = 0;
+                            int iter = 0;
+                            while (x * x + y * y <= 4 && iter < maxIter)
+                            {
+                                double xt = x * x - y * y + x0;
+                                y = 2 * x * y + y0;
+                                x = xt;
+                                iter++;
+                            }
+
+                            int v = iter == maxIter ? 0 : 255 - (int)(255.0 * iter / maxIter);
+
+                            var blended = Color.FromArgb(
+                                (v * baseColor.R) / 255,
+                                (v * baseColor.G) / 255,
+                                (v * baseColor.B) / 255);
+
+                            lock (bmpLock)
+                            {
+                                bmp.SetPixel(px, py, blended);
+                            }
                         }
-                        int c = iter == maxIter ? 0 : 255 - (int)(255.0 * iter / maxIter);
-                        bmp.SetPixel(px, py, Color.FromArgb(c, c, c));
                     }
-                }
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    bmp.Save(ms, ImageFormat.Png);
-                    return ms.ToArray();
-                }
+                });
+            }
+
+            Task.WaitAll(tasks);
+
+            using (var ms = new MemoryStream())
+            {
+                bmp.Save(ms, ImageFormat.Png);
+                return ms.ToArray();
             }
         }
     }

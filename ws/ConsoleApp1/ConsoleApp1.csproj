@@ -55,9 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Connected Services\MojService\ConsoleApp1.MojService.CompositeType.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
     <None Include="Connected Services\MojService\ConsoleApp1.MojService.CreateMatrixResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>

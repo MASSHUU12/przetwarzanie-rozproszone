@@ -104,6 +104,7 @@ namespace WcfService1
         [DataMember] public double YMin { get; set; }
         [DataMember] public double YMax { get; set; }
         [DataMember] public int MaxIterations { get; set; }
+        [DataMember] public int Threads { get; set; } = 1;
     }
 
     [DataContract]
