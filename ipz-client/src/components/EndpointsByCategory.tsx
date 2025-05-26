@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LockIcon from "@mui/icons-material/Lock";
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
-  Typography,
+  AccordionSummary,
+  Box,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
-  Box,
+  Stack,
+  Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import React, { useState } from "react";
 import { endpoints, type Endpoint } from "../api/endpoints";
 
 const groupByCategory = (data: Endpoint[]) => {
@@ -58,14 +60,14 @@ export default function EndpointsByCategory({
           <AccordionDetails>
             <List dense>
               {grouped[cat].map((ep) => (
-                <ListItem disablePadding key={ep.value}>
+                <ListItem disablePadding key={ep.value + ep.method}>
                   <ListItemButton
                     onClick={() => onEndpointClick?.(ep)}
                     sx={{ borderRadius: 1 }}
                   >
                     <ListItemText
                       primary={
-                        <span>
+                        <Stack direction="row" spacing={1}>
                           <strong>{ep.name}</strong>{" "}
                           <Typography
                             component="span"
@@ -74,7 +76,8 @@ export default function EndpointsByCategory({
                           >
                             ({ep.method})
                           </Typography>
-                        </span>
+                          <LockIcon />
+                        </Stack>
                       }
                     />
                   </ListItemButton>

@@ -82,7 +82,7 @@ export const endpoints: Endpoint[] = [
     category: "Authentication",
   },
   {
-    name: "Get User",
+    name: "User",
     value: "user",
     method: "GET",
     params: [],
@@ -90,7 +90,7 @@ export const endpoints: Endpoint[] = [
     category: "User",
   },
   {
-    name: "Delete User",
+    name: "User",
     value: "user",
     method: "DELETE",
     params: [],
@@ -98,7 +98,7 @@ export const endpoints: Endpoint[] = [
     category: "User",
   },
   {
-    name: "Update User",
+    name: "User",
     value: "user",
     method: "PATCH",
     params: [

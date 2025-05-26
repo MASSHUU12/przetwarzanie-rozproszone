@@ -1,8 +1,8 @@
-import LockIcon from "@mui/icons-material/Lock";
 import { Box, Button, Stack, TextField } from "@mui/material";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { endpoints, type Endpoint, type HttpMethod } from "../api/endpoints";
-import { EndpointsByCategory } from "./EndpointsByCategory";
+import EndpointsByCategory from "./EndpointsByCategory";
+import ScrollableContainer from "../common/ScrollableContainer";
 
 interface TopPanelProps {
   onSubmit: (
@@ -49,47 +49,53 @@ function TopPanel({ onSubmit }: TopPanelProps) {
   };
 
   return (
-    <Box
-      sx={{ display: "flex", alignItems: "center", p: 2, bgcolor: "#f2f2f2" }}
-    >
-      <Stack direction="row" spacing={1}>
-        <EndpointsByCategory onEndpointClick={handleEndpointSelect} />
-      </Stack>
-      <Box sx={{ flex: 1 }} />
+    <ScrollableContainer maxHeight="100%">
       <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ display: "flex", gap: 1 }}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          p: 2,
+        }}
       >
-        {selected.params.map((param) => (
-          <TextField
-            key={param.name}
-            label={param.label}
-            size="small"
-            type={param.type}
-            value={values[param.name] || ""}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(param.name, e.target.value)
-            }
-            name={param.name}
-          />
-        ))}
-        {isProtected && (
-          <TextField
-            label="Bearer Token"
-            size="small"
-            type="password"
-            value={token}
-            onChange={handleTokenChange}
-            name="bearerToken"
-            sx={{ minWidth: 220 }}
-          />
-        )}
-        <Button type="submit" variant="contained">
-          Send
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <EndpointsByCategory onEndpointClick={handleEndpointSelect} />
+        </Stack>
+        <Box sx={{ flex: 1 }} />
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ display: "flex", gap: 1 }}
+        >
+          {selected.params.map((param) => (
+            <TextField
+              key={param.name}
+              label={param.label}
+              size="small"
+              type={param.type}
+              value={values[param.name] || ""}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                handleInputChange(param.name, e.target.value)
+              }
+              name={param.name}
+            />
+          ))}
+          {isProtected && (
+            <TextField
+              label="Bearer Token"
+              size="small"
+              type="password"
+              value={token}
+              onChange={handleTokenChange}
+              name="bearerToken"
+              sx={{ minWidth: 220 }}
+            />
+          )}
+          <Button type="submit" variant="contained">
+            Send
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </ScrollableContainer>
   );
 }
 
