@@ -51,4 +51,66 @@ export const endpoints: Endpoint[] = [
     ],
     protected: false,
   },
+  {
+    name: "Logout",
+    value: "logout",
+    method: "POST",
+    params: [],
+    protected: true,
+  },
+  {
+    name: "Register",
+    value: "register",
+    method: "POST",
+    params: [
+      { label: "Email", type: "text", name: "email" },
+      { label: "Phone Number", type: "text", name: "phone_number" },
+      { label: "Password", type: "text", name: "password" },
+      {
+        label: "Password Confirmation",
+        type: "text",
+        name: "password_confirmation",
+      },
+    ],
+    protected: false,
+  },
+  {
+    name: "Get User",
+    value: "user",
+    method: "GET",
+    params: [],
+    protected: true,
+  },
+  {
+    name: "Delete User",
+    value: "user",
+    method: "DELETE",
+    params: [],
+    protected: true,
+  },
+  {
+    name: "Update User",
+    value: "user",
+    method: "PATCH",
+    params: [
+      { label: "Email", type: "text", name: "email" },
+      { label: "Phone Number", type: "text", name: "phone_number" },
+    ],
+    protected: true,
+  },
+  {
+    name: "Update Password",
+    value: "user/password",
+    method: "PATCH",
+    params: [
+      { label: "Current Password", type: "text", name: "current_password" },
+      { label: "New Password", type: "text", name: "new_password" },
+      {
+        label: "New Password Confirmation",
+        type: "text",
+        name: "new_password_confirmation",
+      },
+    ],
+    protected: true,
+  },
 ];
