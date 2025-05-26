@@ -13,6 +13,7 @@ export interface Endpoint {
   method: HttpMethod;
   params: EndpointParam[];
   protected: boolean;
+  category: string;
 }
 
 export const endpoints: Endpoint[] = [
@@ -22,6 +23,7 @@ export const endpoints: Endpoint[] = [
     method: "GET",
     params: [{ label: "Address", type: "text", name: "addr" }],
     protected: false,
+    category: "Air Quality",
   },
   {
     name: "Suggest Address",
@@ -29,6 +31,7 @@ export const endpoints: Endpoint[] = [
     method: "GET",
     params: [{ label: "Address", type: "text", name: "q" }],
     protected: false,
+    category: "Address",
   },
   {
     name: "Leaderboard",
@@ -39,6 +42,7 @@ export const endpoints: Endpoint[] = [
       { label: "Per Page", type: "number", name: "per_page" },
     ],
     protected: false,
+    category: "Leaderboard",
   },
   {
     name: "Login",
@@ -50,6 +54,7 @@ export const endpoints: Endpoint[] = [
       { label: "Password", type: "text", name: "password" },
     ],
     protected: false,
+    category: "Authentication",
   },
   {
     name: "Logout",
@@ -57,6 +62,7 @@ export const endpoints: Endpoint[] = [
     method: "POST",
     params: [],
     protected: true,
+    category: "Authentication",
   },
   {
     name: "Register",
@@ -73,6 +79,7 @@ export const endpoints: Endpoint[] = [
       },
     ],
     protected: false,
+    category: "Authentication",
   },
   {
     name: "Get User",
@@ -80,6 +87,7 @@ export const endpoints: Endpoint[] = [
     method: "GET",
     params: [],
     protected: true,
+    category: "User",
   },
   {
     name: "Delete User",
@@ -87,6 +95,7 @@ export const endpoints: Endpoint[] = [
     method: "DELETE",
     params: [],
     protected: true,
+    category: "User",
   },
   {
     name: "Update User",
@@ -97,6 +106,7 @@ export const endpoints: Endpoint[] = [
       { label: "Phone Number", type: "text", name: "phone_number" },
     ],
     protected: true,
+    category: "User",
   },
   {
     name: "Update Password",
@@ -112,5 +122,6 @@ export const endpoints: Endpoint[] = [
       },
     ],
     protected: true,
+    category: "User",
   },
 ];

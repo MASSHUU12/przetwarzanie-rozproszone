@@ -2,6 +2,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import { Box, Button, Stack, TextField } from "@mui/material";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { endpoints, type Endpoint, type HttpMethod } from "../api/endpoints";
+import { EndpointsByCategory } from "./EndpointsByCategory";
 
 interface TopPanelProps {
   onSubmit: (
@@ -52,16 +53,7 @@ function TopPanel({ onSubmit }: TopPanelProps) {
       sx={{ display: "flex", alignItems: "center", p: 2, bgcolor: "#f2f2f2" }}
     >
       <Stack direction="row" spacing={1}>
-        {endpoints.map((ep) => (
-          <Button
-            key={ep.value}
-            variant={selected.value === ep.value ? "contained" : "outlined"}
-            onClick={() => handleEndpointSelect(ep)}
-          >
-            [{ep.method}] {ep.name}
-            {ep.protected && <LockIcon />}
-          </Button>
-        ))}
+        <EndpointsByCategory onEndpointClick={handleEndpointSelect} />
       </Stack>
       <Box sx={{ flex: 1 }} />
       <Box
