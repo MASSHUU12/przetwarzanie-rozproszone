@@ -30,4 +30,25 @@ export const endpoints: Endpoint[] = [
     params: [{ label: "Address", type: "text", name: "q" }],
     protected: false,
   },
+  {
+    name: "Leaderboard",
+    value: "leaderboard",
+    method: "GET",
+    params: [
+      { label: "Page", type: "number", name: "page" },
+      { label: "Per Page", type: "number", name: "per_page" },
+    ],
+    protected: false,
+  },
+  {
+    name: "Login",
+    value: "login",
+    method: "POST",
+    params: [
+      { label: "Email", type: "text", name: "email" },
+      { label: "Phone Number", type: "text", name: "phone_number" },
+      { label: "Password", type: "text", name: "password" },
+    ],
+    protected: false,
+  },
 ];

@@ -75,6 +75,7 @@ export default function SplitPane({
   minSecondary = 100,
   dividerSize = 4,
   children: [First, Second],
+  ...rest
 }: SplitPaneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [primarySize, setPrimarySize] = useState<number | string>(initialSize);
@@ -121,7 +122,7 @@ export default function SplitPane({
   };
 
   return (
-    <Container ref={containerRef} direction={direction}>
+    <Container ref={containerRef} direction={direction} {...rest}>
       <Pane direction={direction} size={primarySize}>
         {First}
       </Pane>

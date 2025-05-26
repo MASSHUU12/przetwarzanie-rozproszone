@@ -3,6 +3,7 @@ import { useState } from "react";
 import { instance } from "./api/api";
 import type { HttpMethod } from "./api/endpoints";
 import SplitPane from "./common/SplitPane";
+import Note from "./components/Note";
 import ServerResponse from "./components/ServerResponse";
 import TopPanel from "./components/TopPanel";
 
@@ -60,7 +61,16 @@ function App() {
         minSecondary={250}
       >
         <TopPanel onSubmit={handleEndpointSubmit} />
-        <ServerResponse body={data} loading={loading} />
+        <SplitPane
+          direction="horizontal"
+          initialSize="50%"
+          minPrimary={250}
+          minSecondary={250}
+          style={{ height: "100%" }}
+        >
+          <ServerResponse body={data} loading={loading} />
+          <Note />
+        </SplitPane>
       </SplitPane>
     </Box>
   );
