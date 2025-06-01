@@ -76,7 +76,7 @@ export default function EndpointsByCategory({
                           >
                             ({ep.method})
                           </Typography>
-                          <LockIcon />
+                          {ep.protected && <LockIcon />}
                         </Stack>
                       }
                     />
